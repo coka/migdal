@@ -4,11 +4,11 @@
 
 namespace Migdal
 {
-    public class Greeter
+    public static class StringExtensions
     {
-        public string Greet()
+        public static string ToCamelCase(this string s)
         {
-            return "hello, world";
+            return char.ToLower(s[0]) + s.Substring(1);
         }
     }
 }

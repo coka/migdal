@@ -10,10 +10,18 @@ namespace Migdal.Tests
     public class TypeDeclarationGeneratorTest
     {
         [Fact]
-        void Generate_ReturnsTheCorrectTypeDeclaration()
+        void Generate_GivenASimpleClass_ReturnsTheCorrectTypeDeclaration()
         {
-            var expectedOutput = File.ReadAllText("../../../ExampleClass.d.ts");
-            var generatedOutput = TypeDeclarationGenerator.Generate(typeof(ExampleClass));
+            var expectedOutput = File.ReadAllText("../../../SimpleClass.d.ts");
+            var generatedOutput = TypeDeclarationGenerator.Generate(typeof(SimpleClass));
+            Assert.Equal(expectedOutput, generatedOutput);
+        }
+
+        [Fact]
+        void Generate_GivenAClassWithArrays_ReturnsTheCorrectTypeDeclaration()
+        {
+            var expectedOutput = File.ReadAllText("../../../ClassWithArrays.d.ts");
+            var generatedOutput = TypeDeclarationGenerator.Generate(typeof(ClassWithArrays));
             Assert.Equal(expectedOutput, generatedOutput);
         }
     }

@@ -6,6 +6,11 @@ namespace Migdal
 {
     public static class StringExtensions
     {
+        public static string NestUnder(this string s1, string s2)
+        {
+            return $"{s2}<{s1}>";
+        }
+
         public static string ToCamelCase(this string s)
         {
             return char.ToLower(s[0]) + s.Substring(1);

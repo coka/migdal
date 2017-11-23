@@ -27,7 +27,8 @@ namespace Migdal
         {
             if (type == typeof(bool)) return "boolean";
             if (type == typeof(int)) return "number";
-            return "string";
+            if (type == typeof(string)) return "string";
+            return type.Name;
         }
     }
 }

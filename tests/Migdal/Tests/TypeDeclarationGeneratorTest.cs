@@ -24,5 +24,13 @@ namespace Migdal.Tests
             var generatedOutput = TypeDeclarationGenerator.Generate(typeof(ClassWithArrays));
             Assert.Equal(expectedOutput, generatedOutput);
         }
+
+        [Fact]
+        void Generate_GivenANestedClass_ReturnsTheCorrectTypeDeclaration()
+        {
+            var expectedOutput = File.ReadAllText("../../../NestedClass.d.ts");
+            var generatedOutput = TypeDeclarationGenerator.Generate(typeof(NestedClass));
+            Assert.Equal(expectedOutput, generatedOutput);
+        }
     }
 }

@@ -17,3 +17,8 @@ class ClassWithArrays
     public List<int> IntList { get; set; }
     public IEnumerable<int> IntEnumerable { get; set; }
 }
+
+class NestedClass
+{
+    public SimpleClass[] SimpleClasses { get; set; }
+}

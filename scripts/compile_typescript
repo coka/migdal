@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+tsc ./tests/SimpleClass.d.ts
+tsc ./tests/ClassWithArrays.d.ts
+tsc ./tests/NestedClass.d.ts

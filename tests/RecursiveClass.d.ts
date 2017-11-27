@@ -1,0 +1,3 @@
+interface RecursiveClass {
+    recursiveClassProperty: RecursiveClass;
+}

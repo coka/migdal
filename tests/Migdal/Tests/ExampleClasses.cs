@@ -22,3 +22,8 @@ class NestedClass
 {
     public SimpleClass[] SimpleClasses { get; set; }
 }
+
+class RecursiveClass
+{
+    public RecursiveClass RecursiveClassProperty { get; set; }
+}

@@ -3,6 +3,8 @@
 // file, You can obtain one at https://www.mozilla.org/en-US/MPL/2.0/.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -12,21 +14,54 @@ namespace Migdal
     {
         public static string Generate(Type type)
         {
-            var stringBuilder = new StringBuilder();
-
-            stringBuilder.AppendLine("interface " + type.Name + " {");
-
+            var referencedTypes = new List<Type> { type };
             foreach (var property in type.GetRuntimeProperties())
             {
+                Type referencedType;
+
                 var propertyType = property.PropertyType;
-                var propertyName = property.Name.ToCamelCase();
-                var typeName = TypeScriptTypeConverter.Convert(propertyType);
-                stringBuilder.AppendLine($"    {propertyName}: {typeName};");
+                if (propertyType.IsEnumerable())
+                {
+                    referencedType = propertyType.IsArray
+                        ? propertyType.GetElementType()
+                        : propertyType.GenericTypeArguments.Single();
+                }
+                else
+                {
+                    referencedType = propertyType;
+                }
+
+                var referencedNamespace = referencedType.Namespace;
+                if (referencedNamespace == null || !referencedNamespace.StartsWith("System"))
+                {
+                    if (!referencedTypes.Contains(referencedType))
+                    {
+                        referencedTypes.Add(referencedType);
+                    }
+                }
             }
 
-            stringBuilder.AppendLine("}");
+            var generatedInterfaces = new List<string>();
+            foreach (var referencedType in referencedTypes)
+            {
+                var stringBuilder = new StringBuilder();
 
-            return stringBuilder.ToString();
+                stringBuilder.AppendLine("interface " + referencedType.Name + " {");
+
+                foreach (var property in referencedType.GetRuntimeProperties())
+                {
+                    var propertyType = property.PropertyType;
+                    var propertyName = property.Name.ToCamelCase();
+                    var typeName = TypeScriptTypeConverter.Convert(propertyType);
+                    stringBuilder.AppendLine($"    {propertyName}: {typeName};");
+                }
+
+                stringBuilder.AppendLine("}");
+
+                generatedInterfaces.Add(stringBuilder.ToString());
+            }
+
+            return string.Join(Environment.NewLine, generatedInterfaces);
         }
     }
 }

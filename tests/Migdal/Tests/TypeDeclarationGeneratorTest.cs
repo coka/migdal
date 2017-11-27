@@ -32,5 +32,13 @@ namespace Migdal.Tests
             var generatedOutput = TypeDeclarationGenerator.Generate(typeof(NestedClass));
             Assert.Equal(expectedOutput, generatedOutput);
         }
+
+        [Fact]
+        void Generate_GivenARecursiveClass_ReturnsTheCorrectTypeDeclaration()
+        {
+            var expectedOutput = File.ReadAllText("../../../RecursiveClass.d.ts");
+            var generatedOutput = TypeDeclarationGenerator.Generate(typeof(RecursiveClass));
+            Assert.Equal(expectedOutput, generatedOutput);
+        }
     }
 }

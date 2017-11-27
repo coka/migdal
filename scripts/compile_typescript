@@ -3,3 +3,4 @@
 tsc ./tests/SimpleClass.d.ts
 tsc ./tests/ClassWithArrays.d.ts
 tsc ./tests/NestedClass.d.ts
+tsc ./tests/RecursiveClass.d.ts

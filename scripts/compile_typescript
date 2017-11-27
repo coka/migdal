@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-tsc ./tests/SimpleClass.d.ts
-tsc ./tests/ClassWithArrays.d.ts
-tsc ./tests/NestedClass.d.ts
-tsc ./tests/RecursiveClass.d.ts
+tsc ./tests/ExampleTypeDeclarations/SimpleClass.d.ts
+tsc ./tests/ExampleTypeDeclarations/ClassWithArrays.d.ts
+tsc ./tests/ExampleTypeDeclarations/NestedClass.d.ts
+tsc ./tests/ExampleTypeDeclarations/RecursiveClass.d.ts

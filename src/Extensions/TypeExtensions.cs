@@ -6,7 +6,7 @@ using System;
 using System.Collections;
 using System.Reflection;
 
-namespace Migdal
+namespace Migdal.Extensions
 {
     public static class TypeExtensions
     {

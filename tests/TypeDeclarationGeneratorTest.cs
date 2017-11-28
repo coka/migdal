@@ -12,33 +12,51 @@ namespace Migdal.Tests
         [Fact]
         void Generate_GivenASimpleClass_ReturnsTheCorrectTypeDeclaration()
         {
-            var expectedOutput = File.ReadAllText("../../../ExampleTypeDeclarations/SimpleClass.d.ts");
-            var generatedOutput = TypeDeclarationGenerator.Generate(typeof(SimpleClass));
+            var type = typeof(SimpleClass);
+            var expectedOutput = LoadTypeDeclarations("SimpleClass.d.ts");
+            var generatedOutput = TypeDeclarationGenerator.Generate(type);
             Assert.Equal(expectedOutput, generatedOutput);
         }
 
         [Fact]
         void Generate_GivenAClassWithArrays_ReturnsTheCorrectTypeDeclaration()
         {
-            var expectedOutput = File.ReadAllText("../../../ExampleTypeDeclarations/ClassWithArrays.d.ts");
-            var generatedOutput = TypeDeclarationGenerator.Generate(typeof(ClassWithArrays));
+            var type = typeof(ClassWithArrays);
+            var expectedOutput = LoadTypeDeclarations("ClassWithArrays.d.ts");
+            var generatedOutput = TypeDeclarationGenerator.Generate(type);
             Assert.Equal(expectedOutput, generatedOutput);
         }
 
         [Fact]
         void Generate_GivenANestedClass_ReturnsTheCorrectTypeDeclaration()
         {
-            var expectedOutput = File.ReadAllText("../../../ExampleTypeDeclarations/NestedClass.d.ts");
-            var generatedOutput = TypeDeclarationGenerator.Generate(typeof(NestedClass));
+            var type = typeof(NestedClass);
+            var expectedOutput = LoadTypeDeclarations("NestedClass.d.ts");
+            var generatedOutput = TypeDeclarationGenerator.Generate(type);
             Assert.Equal(expectedOutput, generatedOutput);
         }
 
         [Fact]
         void Generate_GivenARecursiveClass_ReturnsTheCorrectTypeDeclaration()
         {
-            var expectedOutput = File.ReadAllText("../../../ExampleTypeDeclarations/RecursiveClass.d.ts");
-            var generatedOutput = TypeDeclarationGenerator.Generate(typeof(RecursiveClass));
+            var type = typeof(RecursiveClass);
+            var expectedOutput = LoadTypeDeclarations("RecursiveClass.d.ts");
+            var generatedOutput = TypeDeclarationGenerator.Generate(type);
             Assert.Equal(expectedOutput, generatedOutput);
+        }
+
+        [Fact]
+        void Generate_GivenMultipleClasses_ReturnsTheCorrectTypeDeclaration()
+        {
+            var types = new[] { typeof(SimpleClass), typeof(ClassWithArrays) };
+            var expectedOutput = LoadTypeDeclarations("MultipleClasses.d.ts");
+            var generatedOutput = TypeDeclarationGenerator.Generate(types);
+            Assert.Equal(expectedOutput, generatedOutput);
+        }
+
+        private static string LoadTypeDeclarations(string filename)
+        {
+            return File.ReadAllText($"../../../ExampleTypeDeclarations/{filename}");
         }
     }
 }

@@ -64,5 +64,12 @@ namespace Migdal
 
             return string.Join(Environment.NewLine, generatedInterfaces);
         }
+
+        public static string Generate(IEnumerable<Type> types)
+        {
+            return string.Join(
+                Environment.NewLine,
+                types.OrderBy(t => t.Name).Select(Generate));
+        }
     }
 }

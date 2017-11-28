@@ -4,3 +4,4 @@ tsc ./tests/ExampleTypeDeclarations/SimpleClass.d.ts
 tsc ./tests/ExampleTypeDeclarations/ClassWithArrays.d.ts
 tsc ./tests/ExampleTypeDeclarations/NestedClass.d.ts
 tsc ./tests/ExampleTypeDeclarations/RecursiveClass.d.ts
+tsc ./tests/ExampleTypeDeclarations/MultipleClasses.d.ts

@@ -27,3 +27,25 @@ class RecursiveClass
 {
     public RecursiveClass RecursiveClassProperty { get; set; }
 }
+
+namespace ExampleNamespace
+{
+    class A
+    {
+        public bool BoolProperty { get; set; }
+    }
+
+    class B
+    {
+        public A Property { get; set; }
+        public SimpleClass SimpleClass { get; set; }
+    }
+}
+
+namespace AnotherExampleNamespace
+{
+    class A
+    {
+        public ExampleNamespace.B Property { get; set; }
+    }
+}

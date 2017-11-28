@@ -54,6 +54,15 @@ namespace Migdal.Tests
             Assert.Equal(expectedOutput, generatedOutput);
         }
 
+        [Fact]
+        void Generate_GivenANamespacedClass_ReturnsTheCorrectTypeDeclaration()
+        {
+            var type = typeof(AnotherExampleNamespace.A);
+            var expectedOutput = LoadTypeDeclarations("NamespacedClass.d.ts");
+            var generatedOutput = TypeDeclarationGenerator.Generate(type);
+            Assert.Equal(expectedOutput, generatedOutput);
+        }
+
         private static string LoadTypeDeclarations(string filename)
         {
             return File.ReadAllText($"../../../ExampleTypeDeclarations/{filename}");

@@ -15,61 +15,90 @@ namespace Migdal
     {
         public static string Generate(Type type)
         {
-            var referencedTypes = new List<Type> { type };
-            foreach (var property in type.GetRuntimeProperties())
+            var referencedTypesGroupedByNamespace = ReferencedTypeFinder
+                .Find(type)
+                .Where(t => !t.IsIgnored())
+                .GroupBy(t => t.Namespace ?? string.Empty)
+                .OrderBy(g => g.Key);
+            var namespacedOutput = new List<string>();
+            var nonNamespacedOutput = string.Empty;
+            foreach (var namespaceGroup in referencedTypesGroupedByNamespace)
             {
-                Type referencedType;
-
-                var propertyType = property.PropertyType;
-                if (propertyType.IsEnumerable())
+                var referencedNamespace = namespaceGroup.Key;
+                if (referencedNamespace == string.Empty)
                 {
-                    referencedType = propertyType.IsArray
-                        ? propertyType.GetElementType()
-                        : propertyType.GenericTypeArguments.Single();
+                    nonNamespacedOutput = namespaceGroup
+                        .OrderBy(t => t.Name)
+                        .Select(GenerateInterface)
+                        .Concatenate();
                 }
                 else
                 {
-                    referencedType = propertyType;
-                }
+                    var stringBuilder = new StringBuilder();
 
-                var referencedNamespace = referencedType.Namespace;
-                if (referencedNamespace == null || !referencedNamespace.StartsWith("System"))
-                {
-                    if (!referencedTypes.Contains(referencedType))
-                    {
-                        referencedTypes.Add(referencedType);
-                    }
+                    stringBuilder.AppendLine($"declare namespace {referencedNamespace} {{");
+
+                    stringBuilder.Append(namespaceGroup
+                        .OrderBy(t => t.Name)
+                        .Select(GenerateIndentedInterface)
+                        .Concatenate());
+
+                    stringBuilder.AppendLine("}");
+
+                    namespacedOutput.Add(stringBuilder.ToString());
                 }
             }
 
-            var generatedInterfaces = new List<string>();
-            foreach (var referencedType in referencedTypes)
+            if (namespacedOutput.Any())
             {
-                var stringBuilder = new StringBuilder();
-
-                stringBuilder.AppendLine("interface " + referencedType.Name + " {");
-
-                foreach (var property in referencedType.GetRuntimeProperties())
-                {
-                    var propertyType = property.PropertyType;
-                    var propertyName = property.Name.ToCamelCase();
-                    var typeName = TypeScriptTypeConverter.Convert(propertyType);
-                    stringBuilder.AppendLine($"    {propertyName}: {typeName};");
-                }
-
-                stringBuilder.AppendLine("}");
-
-                generatedInterfaces.Add(stringBuilder.ToString());
+                namespacedOutput.Add(nonNamespacedOutput);
+                return namespacedOutput.Concatenate();
             }
 
-            return string.Join(Environment.NewLine, generatedInterfaces);
+            return nonNamespacedOutput;
         }
 
         public static string Generate(IEnumerable<Type> types)
         {
-            return string.Join(
-                Environment.NewLine,
-                types.OrderBy(t => t.Name).Select(Generate));
+            return types.OrderBy(t => t.Name).Select(Generate).Concatenate();
+        }
+
+        private static string GenerateInterface(Type type)
+        {
+            var stringBuilder = new StringBuilder();
+
+            stringBuilder.AppendLine($"interface {type.Name} {{");
+
+            foreach (var property in type.GetRuntimeProperties())
+            {
+                var propertyType = property.PropertyType;
+                var propertyName = property.Name.ToCamelCase();
+                var typeName = TypeScriptTypeConverter.Convert(propertyType);
+                stringBuilder.AppendLine($"    {propertyName}: {typeName};");
+            }
+
+            stringBuilder.AppendLine("}");
+
+            return stringBuilder.ToString();
+        }
+
+        private static string GenerateIndentedInterface(Type type)
+        {
+            var stringBuilder = new StringBuilder();
+
+            stringBuilder.AppendLine($"    interface {type.Name} {{");
+
+            foreach (var property in type.GetRuntimeProperties())
+            {
+                var propertyType = property.PropertyType;
+                var propertyName = property.Name.ToCamelCase();
+                var typeName = TypeScriptTypeConverter.Convert(propertyType);
+                stringBuilder.AppendLine($"        {propertyName}: {typeName};");
+            }
+
+            stringBuilder.AppendLine("    }");
+
+            return stringBuilder.ToString();
         }
     }
 }

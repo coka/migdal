@@ -11,47 +11,47 @@ namespace Migdal.Tests
     public class ReferencedTypeFinderTest
     {
         [Fact]
-        private void Find_TypeWithoutReferences_ReturnsOnlyThatType()
+        void Find_TypeWithoutReferences_ReturnsOnlyThatType()
         {
-            var type = typeof(TypeWithoutReferences);
+            var type = typeof(A);
             var expectedReferences = new HashSet<Type>
             {
-                typeof(TypeWithoutReferences)
+                typeof(A)
             };
             var actualReferences = ReferencedTypeFinder.Find(type);
             Assert.Equal(expectedReferences, actualReferences);
         }
 
         [Fact]
-        private void Find_TypeWithOneReference_ReturnsAllReferences()
+        void Find_TypeWithOneReference_ReturnsAllReferences()
         {
             var type = typeof(TypeWithOneReference);
             var expectedReferences = new HashSet<Type>
             {
                 typeof(TypeWithOneReference),
-                typeof(TypeWithoutReferences)
+                typeof(A)
             };
             var actualReferences = ReferencedTypeFinder.Find(type);
             Assert.Equal(expectedReferences, actualReferences);
         }
 
         [Fact]
-        private void Find_TypeWithManyReferences_ReturnsAllReferences()
+        void Find_TypeWithManyReferences_ReturnsAllReferences()
         {
             var type = typeof(TypeWithManyReferences);
             var expectedReferences = new HashSet<Type>
             {
                 typeof(TypeWithManyReferences),
-                typeof(TypeWithoutReferences),
-                typeof(AnotherTypeWithoutReferences),
-                typeof(YetAnotherTypeWithoutReferences)
+                typeof(A),
+                typeof(B),
+                typeof(C)
             };
             var actualReferences = ReferencedTypeFinder.Find(type);
             Assert.Equal(expectedReferences, actualReferences);
         }
 
         [Fact]
-        private void Find_RecursiveType_ReturnsOnlyThatType()
+        void Find_RecursiveType_ReturnsOnlyThatType()
         {
             var type = typeof(RecursiveType);
             var expectedReferences = new HashSet<Type>
@@ -63,17 +63,17 @@ namespace Migdal.Tests
         }
 
         [Fact]
-        private void Find_TypeWithTransitiveReferences_ReturnsAllReferences()
+        void Find_TypeWithTransitiveReferences_ReturnsAllReferences()
         {
             var type = typeof(TypeWithTransitiveReferences);
             var expectedReferences = new HashSet<Type>
             {
                 typeof(TypeWithTransitiveReferences),
                 typeof(TypeWithOneReference),
-                typeof(TypeWithoutReferences),
+                typeof(A),
                 typeof(TypeWithManyReferences),
-                typeof(AnotherTypeWithoutReferences),
-                typeof(YetAnotherTypeWithoutReferences),
+                typeof(B),
+                typeof(C),
                 typeof(RecursiveType)
             };
             var actualReferences = ReferencedTypeFinder.Find(type);
@@ -81,7 +81,7 @@ namespace Migdal.Tests
         }
 
         [Fact]
-        private void Find_TypeWithCyclicReferences_ReturnsAllReferences()
+        void Find_TypeWithCyclicReferences_ReturnsAllReferences()
         {
             var type = typeof(TypeWithCyclicReferencesA);
             var expectedReferences = new HashSet<Type>
@@ -94,89 +94,124 @@ namespace Migdal.Tests
         }
 
         [Fact]
-        private void Find_TypeWithOneGenericArgument_ReturnsAllReferences()
+        void Find_TypeWithOneGenericArgument_ReturnsAllReferences()
         {
-            var type = typeof(TypeWithOneGenericArgument<bool>);
+            var type = typeof(IEnumerable<A>);
             var expectedReferences = new HashSet<Type>
             {
-                typeof(TypeWithOneGenericArgument<>),
-                typeof(bool)
+                typeof(IEnumerable<>),
+                typeof(A)
             };
             var actualReferences = ReferencedTypeFinder.Find(type);
             Assert.Equal(expectedReferences, actualReferences);
         }
 
         [Fact]
-        private void Find_TypeWithManyGenericArguments_ReturnsAllReferences()
+        void Find_TypeWithManyGenericArguments_ReturnsAllReferences()
         {
-            var type = typeof(TypeWithManyGenericArguments<bool, int, decimal>);
+            var type = typeof(TypeWithManyGenericArguments<A, bool, int>);
             var expectedReferences = new HashSet<Type>
             {
                 typeof(TypeWithManyGenericArguments<,,>),
+                typeof(A),
                 typeof(bool),
-                typeof(int),
-                typeof(decimal)
+                typeof(int)
             };
             var actualReferences = ReferencedTypeFinder.Find(type);
             Assert.Equal(expectedReferences, actualReferences);
         }
 
-        private sealed class TypeWithoutReferences
+        [Fact]
+        void Find_TypeWithVaryingGenericArguments_ReturnsAllReferences()
+        {
+            var type = typeof(TypeWithVaryingGenericArguments);
+            var expectedReferences = new HashSet<Type>
+            {
+                typeof(TypeWithVaryingGenericArguments),
+                typeof(IEnumerable<>),
+                typeof(A),
+                typeof(B)
+            };
+            var actualReferences = ReferencedTypeFinder.Find(type);
+            Assert.Equal(expectedReferences, actualReferences);
+        }
+
+        [Fact]
+        void Find_TypeWithNestedGenericArguments_ReturnsAllReferences()
+        {
+            var type = typeof(TypeWithNestedGenericArguments);
+            var expectedReferences = new HashSet<Type>
+            {
+                typeof(TypeWithNestedGenericArguments),
+                typeof(IEnumerable<>),
+                typeof(A)
+            };
+            var actualReferences = ReferencedTypeFinder.Find(type);
+            Assert.Equal(expectedReferences, actualReferences);
+        }
+
+        class A
         {
         }
 
-        private sealed class AnotherTypeWithoutReferences
+        class B
         {
         }
 
-        private sealed class YetAnotherTypeWithoutReferences
+        class C
         {
         }
 
-        private sealed class TypeWithOneReference
+        class TypeWithOneReference
         {
-            public TypeWithoutReferences TypeWithoutReferences { get; set; }
+            public A A { get; set; }
         }
 
-        private sealed class TypeWithManyReferences
+        class TypeWithManyReferences
         {
-            public TypeWithoutReferences TypeWithoutReferences { get; set; }
-            public AnotherTypeWithoutReferences AnotherTypeWithoutReferences { get; set; }
-            public YetAnotherTypeWithoutReferences YetAnotherTypeWithoutReferences { get; set; }
+            public A A { get; set; }
+            public B B { get; set; }
+            public C C { get; set; }
         }
 
-        private sealed class RecursiveType
+        class RecursiveType
         {
-            public RecursiveType RecursiveTypeProperty { get; set; }
+            public RecursiveType A { get; set; }
         }
 
-        private sealed class TypeWithTransitiveReferences
+        class TypeWithTransitiveReferences
         {
-            public TypeWithOneReference TypeWithOneReference { get; set; }
-            public TypeWithManyReferences TypeWithManyReferences { get; set; }
-            public RecursiveType RecursiveType { get; set; }
+            public TypeWithOneReference A { get; set; }
+            public TypeWithManyReferences B { get; set; }
+            public RecursiveType C { get; set; }
         }
 
-        private sealed class TypeWithCyclicReferencesA
+        class TypeWithCyclicReferencesA
         {
-            public TypeWithCyclicReferencesB Property { get; set; }
+            public TypeWithCyclicReferencesB A { get; set; }
         }
 
-        private sealed class TypeWithCyclicReferencesB
+        class TypeWithCyclicReferencesB
         {
-            public TypeWithCyclicReferencesA Property { get; set; }
+            public TypeWithCyclicReferencesA A { get; set; }
         }
 
-        private sealed class TypeWithOneGenericArgument<T>
+        class TypeWithManyGenericArguments<T, U, V>
         {
-            public T T1 { get; set; }
+            public T A { get; set; }
+            public U B { get; set; }
+            public V C { get; set; }
         }
 
-        private sealed class TypeWithManyGenericArguments<T, U, V>
+        class TypeWithVaryingGenericArguments
         {
-            public T T1 { get; set; }
-            public U T2 { get; set; }
-            public V T3 { get; set; }
+            public IEnumerable<A> A { get; set; }
+            public IEnumerable<B> B { get; set; }
+        }
+
+        class TypeWithNestedGenericArguments
+        {
+            public IEnumerable<IEnumerable<A>> A { get; set; }
         }
     }
 }

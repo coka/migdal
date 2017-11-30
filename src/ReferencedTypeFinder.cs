@@ -2,9 +2,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://www.mozilla.org/en-US/MPL/2.0/.
 
-using Migdal.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Migdal
@@ -20,11 +20,20 @@ namespace Migdal
 
         private static void Reference(Type type, ISet<Type> references)
         {
-            if (!references.Add(GetTypeOfInterest(type))) return;
+            if (!references.Add(GetTypeOfInterest(type)) &&
+                !type.GetTypeInfo().IsGenericType)
+                return;
 
-            foreach (var typeParameter in type.GetTypeInfo().GenericTypeParameters)
-                Reference(typeParameter, references);
-            foreach (var propertyType in type.GetPropertyTypes())
+            var genericTypeArguments = type
+                .GetTypeInfo()
+                .GenericTypeArguments;
+            foreach (var argument in genericTypeArguments)
+                Reference(argument, references);
+
+            var runtimePropertyTypes = type
+                .GetRuntimeProperties()
+                .Select(p => p.PropertyType);
+            foreach (var propertyType in runtimePropertyTypes)
                 Reference(propertyType, references);
         }
 

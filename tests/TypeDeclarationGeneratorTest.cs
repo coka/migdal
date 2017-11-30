@@ -63,6 +63,15 @@ namespace Migdal.Tests
             Assert.Equal(expectedOutput, generatedOutput);
         }
 
+        [Fact]
+        void Generate_GivenAClassWithGenerics_ReturnsTheCorrectTypeDeclaration()
+        {
+            var type = typeof(ClassWithGenerics);
+            var expectedOutput = LoadTypeDeclarations("ClassWithGenerics.d.ts");
+            var generatedOutput = TypeDeclarationGenerator.Generate(type);
+            Assert.Equal(expectedOutput, generatedOutput);
+        }
+
         private static string LoadTypeDeclarations(string filename)
         {
             return File.ReadAllText($"../../../ExampleTypeDeclarations/{filename}");

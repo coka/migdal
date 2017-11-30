@@ -5,4 +5,5 @@ tsc ./tests/ExampleTypeDeclarations/ClassWithArrays.d.ts
 tsc ./tests/ExampleTypeDeclarations/NestedClass.d.ts
 tsc ./tests/ExampleTypeDeclarations/RecursiveClass.d.ts
 tsc ./tests/ExampleTypeDeclarations/MultipleClasses.d.ts
+tsc ./tests/ExampleTypeDeclarations/ClassWithGenerics.d.ts
 tsc ./tests/ExampleTypeDeclarations/NamespacedClass.d.ts

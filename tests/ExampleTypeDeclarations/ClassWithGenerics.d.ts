@@ -1,9 +1,3 @@
-declare namespace AnotherExampleNamespace {
-    interface A {
-        property: ExampleNamespace.B;
-    }
-}
-
 declare namespace ExampleNamespace {
     interface A {
         boolProperty: boolean;
@@ -13,6 +7,17 @@ declare namespace ExampleNamespace {
         property: A;
         simpleClass: SimpleClass;
     }
+}
+
+declare namespace System.Collections.Generic {
+    interface KeyValuePair<TKey, TValue> {
+        key: TKey;
+        value: TValue;
+    }
+}
+
+interface ClassWithGenerics {
+    intToBs: System.Collections.Generic.KeyValuePair<number, Array<ExampleNamespace.B>>;
 }
 
 interface SimpleClass {

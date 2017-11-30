@@ -17,7 +17,7 @@ namespace Migdal
         {
             var referencedTypesGroupedByNamespace = ReferencedTypeFinder
                 .Find(type)
-                .Where(t => !t.IsIgnored())
+                .Where(t => !TypeScriptTypeConverter.HandlesSpecially(t))
                 .GroupBy(t => t.Namespace ?? string.Empty)
                 .OrderBy(g => g.Key);
             var namespacedOutput = new List<string>();
@@ -40,7 +40,7 @@ namespace Migdal
 
                     stringBuilder.Append(namespaceGroup
                         .OrderBy(t => t.Name)
-                        .Select(GenerateIndentedInterface)
+                        .Select(t => GenerateInterfaceForNamespace(t, referencedNamespace))
                         .Concatenate());
 
                     stringBuilder.AppendLine("}");
@@ -67,13 +67,13 @@ namespace Migdal
         {
             var stringBuilder = new StringBuilder();
 
-            stringBuilder.AppendLine($"interface {type.Name} {{");
+            stringBuilder.AppendLine($"interface {TypeScriptTypeConverter.Convert(type)} {{");
 
             foreach (var property in type.GetRuntimeProperties())
             {
                 var propertyType = property.PropertyType;
                 var propertyName = property.Name.ToCamelCase();
-                var typeName = TypeScriptTypeConverter.Convert(propertyType);
+                var typeName = TypeScriptTypeConverter.Convert(propertyType, null);
                 stringBuilder.AppendLine($"    {propertyName}: {typeName};");
             }
 
@@ -82,17 +82,19 @@ namespace Migdal
             return stringBuilder.ToString();
         }
 
-        private static string GenerateIndentedInterface(Type type)
+        private static string GenerateInterfaceForNamespace(
+            Type type,
+            string ns)
         {
             var stringBuilder = new StringBuilder();
 
-            stringBuilder.AppendLine($"    interface {type.Name} {{");
+            stringBuilder.AppendLine($"    interface {TypeScriptTypeConverter.Convert(type)} {{");
 
             foreach (var property in type.GetRuntimeProperties())
             {
                 var propertyType = property.PropertyType;
                 var propertyName = property.Name.ToCamelCase();
-                var typeName = TypeScriptTypeConverter.Convert(propertyType);
+                var typeName = TypeScriptTypeConverter.Convert(propertyType, ns);
                 stringBuilder.AppendLine($"        {propertyName}: {typeName};");
             }
 

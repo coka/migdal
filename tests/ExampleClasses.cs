@@ -28,6 +28,11 @@ class RecursiveClass
     public RecursiveClass RecursiveClassProperty { get; set; }
 }
 
+class ClassWithGenerics
+{
+    public KeyValuePair<int, IEnumerable<ExampleNamespace.B>> IntToBs { get; set; }
+}
+
 namespace ExampleNamespace
 {
     class A

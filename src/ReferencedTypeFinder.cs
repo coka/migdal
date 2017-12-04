@@ -20,14 +20,26 @@ namespace Migdal
 
         private static void Reference(Type type, ISet<Type> references)
         {
-            if (!references.Add(GetTypeOfInterest(type)) &&
-                !type.GetTypeInfo().IsGenericType)
-                return;
+            var typeInfo = type.GetTypeInfo();
+            var isGeneric = typeInfo.IsGenericType;
+            var processed = !isGeneric && references.Contains(type);
 
-            var genericTypeArguments = type
-                .GetTypeInfo()
-                .GenericTypeArguments;
-            foreach (var argument in genericTypeArguments)
+            if (processed) return;
+
+            var typeOfInterest = isGeneric
+                ? type.GetGenericTypeDefinition()
+                : type;
+
+            if (typeOfInterest.IsArray)
+            {
+                Reference(typeOfInterest.GetElementType(), references);
+            }
+            else
+            {
+                references.Add(typeOfInterest);
+            }
+
+            foreach (var argument in typeInfo.GenericTypeArguments)
                 Reference(argument, references);
 
             var runtimePropertyTypes = type
@@ -35,14 +47,6 @@ namespace Migdal
                 .Select(p => p.PropertyType);
             foreach (var propertyType in runtimePropertyTypes)
                 Reference(propertyType, references);
-        }
-
-        private static Type GetTypeOfInterest(Type type)
-        {
-            var typeInfo = type.GetTypeInfo();
-            if (typeInfo.IsGenericType) return type.GetGenericTypeDefinition();
-            if (typeInfo.IsArray) return type.GetElementType();
-            return type;
         }
     }
 }

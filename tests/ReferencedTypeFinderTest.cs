@@ -150,6 +150,30 @@ namespace Migdal.Tests
             Assert.Equal(expectedReferences, actualReferences);
         }
 
+        [Fact]
+        void Find_TypeWithArrayOfGenericTypes_ReturnsAllReferences()
+        {
+            var type = typeof(TypeWithArrayOfGenericTypes);
+            var expectedReferences = new HashSet<Type>
+            {
+                typeof(TypeWithArrayOfGenericTypes),
+
+                // array property types
+                typeof(bool),
+                typeof(int),
+                typeof(long),
+                typeof(object),
+
+                typeof(IEnumerable<>),
+                typeof(A)
+            };
+            var actualReferences = ReferencedTypeFinder.Find(type);
+
+            // TODO: Wrap assertions.
+            Assert.Subset(expectedReferences, actualReferences);
+            Assert.Superset(expectedReferences, actualReferences);
+        }
+
         class A
         {
         }
@@ -212,6 +236,11 @@ namespace Migdal.Tests
         class TypeWithNestedGenericArguments
         {
             public IEnumerable<IEnumerable<A>> A { get; set; }
+        }
+
+        class TypeWithArrayOfGenericTypes
+        {
+            public IEnumerable<A>[] A { get; set; }
         }
     }
 }

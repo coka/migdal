@@ -17,7 +17,7 @@ declare namespace System.Collections.Generic {
 }
 
 interface ClassWithGenerics {
-    intToBs: System.Collections.Generic.KeyValuePair<number, Array<ExampleNamespace.B>>;
+    arrayOfIntToBs: Array<System.Collections.Generic.KeyValuePair<number, Array<ExampleNamespace.B>>>;
 }
 
 interface SimpleClass {

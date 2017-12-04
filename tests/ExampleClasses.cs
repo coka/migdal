@@ -30,7 +30,7 @@ class RecursiveClass
 
 class ClassWithGenerics
 {
-    public KeyValuePair<int, IEnumerable<ExampleNamespace.B>> IntToBs { get; set; }
+    public KeyValuePair<int, IEnumerable<ExampleNamespace.B>>[] ArrayOfIntToBs { get; set; }
 }
 
 namespace ExampleNamespace

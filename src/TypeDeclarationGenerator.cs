@@ -13,7 +13,9 @@ namespace Migdal
 {
     public static class TypeDeclarationGenerator
     {
-        public static string Generate(Type type)
+        public static string Generate(
+            Type type,
+            Func<TypeInfo, string> typeNameConverter = null)
         {
             var referencedTypesGroupedByNamespace = ReferencedTypeFinder
                 .Find(type)
@@ -29,7 +31,9 @@ namespace Migdal
                 {
                     nonNamespacedOutput = namespaceGroup
                         .OrderBy(t => t.Name)
-                        .Select(GenerateInterface)
+                        .Select(t => GenerateInterface(
+                            t,
+                            typeNameConverter))
                         .Concatenate();
                 }
                 else
@@ -40,7 +44,10 @@ namespace Migdal
 
                     stringBuilder.Append(namespaceGroup
                         .OrderBy(t => t.Name)
-                        .Select(t => GenerateInterfaceForNamespace(t, referencedNamespace))
+                        .Select(t => GenerateInterfaceForNamespace(
+                            t,
+                            typeNameConverter,
+                            referencedNamespace))
                         .Concatenate());
 
                     stringBuilder.AppendLine("}");
@@ -58,23 +65,34 @@ namespace Migdal
             return nonNamespacedOutput;
         }
 
-        public static string Generate(IEnumerable<Type> types)
+        public static string Generate(
+            IEnumerable<Type> types,
+            Func<TypeInfo, string> typeNameConverter = null)
         {
-            return types.OrderBy(t => t.Name).Select(Generate).Concatenate();
+            return types
+                .OrderBy(t => t.Name)
+                .Select(t => Generate(t, typeNameConverter))
+                .Concatenate();
         }
 
-        private static string GenerateInterface(Type type)
+        private static string GenerateInterface(
+            Type type,
+            Func<TypeInfo, string> typeNameConverter)
         {
+            var typeConverter = new TypeScriptTypeConverter(typeNameConverter);
+            var typeName = typeConverter.Convert(type);
+
             var stringBuilder = new StringBuilder();
 
-            stringBuilder.AppendLine($"interface {TypeScriptTypeConverter.Convert(type)} {{");
+            stringBuilder.AppendLine($"interface {typeName} {{");
 
             foreach (var property in type.GetRuntimeProperties())
             {
                 var propertyType = property.PropertyType;
                 var propertyName = property.Name.ToCamelCase();
-                var typeName = TypeScriptTypeConverter.Convert(propertyType, null);
-                stringBuilder.AppendLine($"    {propertyName}: {typeName};");
+                var propertyTypeName = typeConverter.Convert(propertyType);
+
+                stringBuilder.AppendLine($"    {propertyName}: {propertyTypeName};");
             }
 
             stringBuilder.AppendLine("}");
@@ -82,20 +100,26 @@ namespace Migdal
             return stringBuilder.ToString();
         }
 
+        // TODO
         private static string GenerateInterfaceForNamespace(
             Type type,
-            string ns)
+            Func<TypeInfo, string> typeNameConverter,
+            string @namespace)
         {
+            var typeConverter = new TypeScriptTypeConverter(typeNameConverter);
+            var typeName = typeConverter.Convert(type, @namespace);
+
             var stringBuilder = new StringBuilder();
 
-            stringBuilder.AppendLine($"    interface {TypeScriptTypeConverter.Convert(type, ns)} {{");
+            stringBuilder.AppendLine($"    interface {typeName} {{");
 
             foreach (var property in type.GetRuntimeProperties())
             {
                 var propertyType = property.PropertyType;
                 var propertyName = property.Name.ToCamelCase();
-                var typeName = TypeScriptTypeConverter.Convert(propertyType, ns);
-                stringBuilder.AppendLine($"        {propertyName}: {typeName};");
+                var propertyTypeName = typeConverter.Convert(propertyType, @namespace);
+
+                stringBuilder.AppendLine($"        {propertyName}: {propertyTypeName};");
             }
 
             stringBuilder.AppendLine("    }");

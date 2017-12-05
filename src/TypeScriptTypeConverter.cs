@@ -11,13 +11,22 @@ using System.Reflection;
 
 namespace Migdal
 {
-    public static class TypeScriptTypeConverter
+    internal class TypeScriptTypeConverter
     {
+        public static readonly Func<TypeInfo, string> DefaultTypeNameConverter;
+
         private static readonly TypeInfo s_iEnumerableTypeInfo;
         private static readonly Dictionary<Type, string> s_conversionLUT;
 
         static TypeScriptTypeConverter()
         {
+            DefaultTypeNameConverter = typeInfo =>
+            {
+                var name = typeInfo.Name;
+                var isGeneric = typeInfo.IsGenericType;
+                return isGeneric ? name.Remove(name.IndexOf('`')) : name;
+            };
+
             s_iEnumerableTypeInfo = typeof(IEnumerable).GetTypeInfo();
 
             s_conversionLUT = new Dictionary<Type, string>
@@ -38,7 +47,15 @@ namespace Migdal
             };
         }
 
-        public static string Convert(Type type, string @namespace = null)
+        private readonly Func<TypeInfo, string> _typeNameConverter;
+
+        public TypeScriptTypeConverter(
+            Func<TypeInfo, string> typeNameConverter = null)
+        {
+            _typeNameConverter = typeNameConverter ?? DefaultTypeNameConverter;
+        }
+
+        public string Convert(Type type, string @namespace = null)
         {
             if (s_conversionLUT.ContainsKey(type)) return s_conversionLUT[type];
 
@@ -54,7 +71,7 @@ namespace Migdal
                 typeInfo.Namespace != null &&
                 typeInfo.Namespace != @namespace;
             var prefix = shouldBeNamespaced ? typeInfo.Namespace + "." : "";
-            var typeName = prefix + GetTypeName(typeInfo);
+            var typeName = prefix + _typeNameConverter(typeInfo);
 
             if (!typeInfo.IsGenericType) return typeName;
 
@@ -88,13 +105,6 @@ namespace Migdal
             return type == typeof(object) ||
                 s_conversionLUT.ContainsKey(type) ||
                 s_iEnumerableTypeInfo.IsAssignableFrom(type.GetTypeInfo());
-        }
-
-        private static string GetTypeName(TypeInfo typeInfo)
-        {
-            var name = typeInfo.Name;
-            var isGeneric = typeInfo.IsGenericType;
-            return isGeneric ? name.Remove(name.IndexOf('`')) : name;
         }
     }
 }

@@ -38,85 +38,49 @@ namespace Migdal
             };
         }
 
-        public static string Convert(Type type)
+        public static string Convert(Type type, string @namespace = null)
         {
             if (s_conversionLUT.ContainsKey(type)) return s_conversionLUT[type];
 
             if (type.IsArray)
             {
                 var elementType = type.GetElementType();
-                return Convert(elementType).NestUnder("Array");
+                return Convert(elementType, @namespace).NestUnder("Array");
             }
 
             var typeInfo = type.GetTypeInfo();
+            var shouldBeNamespaced =
+                !typeInfo.IsGenericParameter &&
+                typeInfo.Namespace != null &&
+                typeInfo.Namespace != @namespace;
+            var prefix = shouldBeNamespaced ? typeInfo.Namespace + "." : "";
+            var typeName = prefix + GetTypeName(typeInfo);
 
-            if (!typeInfo.IsGenericType) return typeInfo.Name;
+            if (!typeInfo.IsGenericType) return typeName;
 
             if (s_iEnumerableTypeInfo.IsAssignableFrom(typeInfo))
             {
                 var elementType = typeInfo.GenericTypeArguments.Single();
-                return Convert(elementType).NestUnder("Array");
+                return Convert(elementType, @namespace).NestUnder("Array");
             }
-
-            var genericTypeName = typeInfo.Name.Remove(typeInfo.Name.IndexOf('`'));
 
             var genericTypeParameters = typeInfo.GenericTypeParameters;
             if (genericTypeParameters.Any())
-                return string.Join(", ", genericTypeParameters.Select(Convert))
-                    .NestUnder(genericTypeName);
+            {
+                var parameters = genericTypeParameters
+                    .Select(t => Convert(t, @namespace));
+                return string.Join(", ", parameters).NestUnder(typeName);
+            }
 
             var genericTypeArguments = typeInfo.GenericTypeArguments;
             if (genericTypeArguments.Any())
-                return string.Join(", ", genericTypeArguments.Select(Convert))
-                    .NestUnder(genericTypeName);
-
-            return Convert(type).NestUnder(genericTypeName);
-        }
-
-        // TODO
-        public static string Convert(Type type, string ns)
-        {
-            if (s_conversionLUT.ContainsKey(type)) return s_conversionLUT[type];
-
-            if (type.IsArray)
             {
-                var elementType = type.GetElementType();
-                return Convert(elementType, ns).NestUnder("Array");
+                var arguments = genericTypeArguments
+                    .Select(t => Convert(t, @namespace));
+                return string.Join(", ", arguments).NestUnder(typeName);
             }
 
-            var typeInfo = type.GetTypeInfo();
-
-            var prefix = string.Empty;
-            if (!typeInfo.IsGenericType)
-            {
-                if (typeInfo.Namespace != null && typeInfo.Namespace != ns)
-                    prefix = typeInfo.Namespace + ".";
-
-                return prefix + typeInfo.Name;
-            }
-
-            if (s_iEnumerableTypeInfo.IsAssignableFrom(typeInfo))
-            {
-                var elementType = typeInfo.GenericTypeArguments.Single();
-                return Convert(elementType, ns).NestUnder("Array");
-            }
-
-            if (typeInfo.Namespace != null && typeInfo.Namespace != ns)
-                prefix = typeInfo.Namespace + ".";
-
-            var genericTypeName = prefix + typeInfo.Name.Remove(typeInfo.Name.IndexOf('`'));
-
-            var genericTypeParameters = typeInfo.GenericTypeParameters;
-            if (genericTypeParameters.Any())
-                return string.Join(", ", genericTypeParameters.Select(t => Convert(t, ns)))
-                    .NestUnder(genericTypeName);
-
-            var genericTypeArguments = typeInfo.GenericTypeArguments;
-            if (genericTypeArguments.Any())
-                return string.Join(", ", genericTypeArguments.Select(t => Convert(t, ns)))
-                    .NestUnder(genericTypeName);
-
-            return Convert(type, ns).NestUnder(genericTypeName);
+            return Convert(type, @namespace).NestUnder(typeName);
         }
 
         public static bool HandlesSpecially(Type type)
@@ -124,6 +88,13 @@ namespace Migdal
             return type == typeof(object) ||
                 s_conversionLUT.ContainsKey(type) ||
                 s_iEnumerableTypeInfo.IsAssignableFrom(type.GetTypeInfo());
+        }
+
+        private static string GetTypeName(TypeInfo typeInfo)
+        {
+            var name = typeInfo.Name;
+            var isGeneric = typeInfo.IsGenericType;
+            return isGeneric ? name.Remove(name.IndexOf('`')) : name;
         }
     }
 }

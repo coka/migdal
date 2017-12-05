@@ -36,10 +36,18 @@ namespace Migdal.Tests
             }
 
             [Fact]
-            void TypeWithNamespace()
+            void TypeWithNamespaceForNoNamespace()
             {
                 var type = typeof(ExampleNamespace.A);
                 var result = TypeScriptTypeConverter.Convert(type);
+                Assert.Equal("ExampleNamespace.A", result);
+            }
+
+            [Fact]
+            void TypeWithNamespaceForSameNamespace()
+            {
+                var type = typeof(ExampleNamespace.A);
+                var result = TypeScriptTypeConverter.Convert(type, "ExampleNamespace");
                 Assert.Equal("A", result);
             }
 
@@ -135,18 +143,6 @@ namespace Migdal.Tests
                 var type = typeof(TypeWithManyGenericArguments<,,>);
                 var result = TypeScriptTypeConverter.Convert(type);
                 Assert.Equal("TypeWithManyGenericArguments<T, U, V>", result);
-            }
-
-            private class TypeWithOneGenericArgument<T>
-            {
-                public T A { get; set; }
-            }
-
-            private class TypeWithManyGenericArguments<T, U, V>
-            {
-                public T A { get; set; }
-                public U B { get; set; }
-                public V C { get; set; }
             }
         }
     }

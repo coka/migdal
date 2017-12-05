@@ -33,6 +33,18 @@ class ClassWithGenerics
     public KeyValuePair<int, IEnumerable<ExampleNamespace.B>>[] ArrayOfIntToBs { get; set; }
 }
 
+class TypeWithOneGenericArgument<T>
+{
+    public T A { get; set; }
+}
+
+class TypeWithManyGenericArguments<T, U, V>
+{
+    public T A { get; set; }
+    public U B { get; set; }
+    public V C { get; set; }
+}
+
 namespace ExampleNamespace
 {
     class A

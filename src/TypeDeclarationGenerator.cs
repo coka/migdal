@@ -88,7 +88,7 @@ namespace Migdal
         {
             var stringBuilder = new StringBuilder();
 
-            stringBuilder.AppendLine($"    interface {TypeScriptTypeConverter.Convert(type)} {{");
+            stringBuilder.AppendLine($"    interface {TypeScriptTypeConverter.Convert(type, ns)} {{");
 
             foreach (var property in type.GetRuntimeProperties())
             {
